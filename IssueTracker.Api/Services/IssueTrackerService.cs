@@ -172,6 +172,40 @@ namespace IssueTracker.Api
                 .ToListAsync();
         }
 
+        public async Task<PagedResponse<IssueResponse>> GetIssuesAsync(IssueQuery filter)
+        {
+            IQueryable<Issue> query = _context.Issues;
+
+            if (filter.ProjectId != null)
+                query = query.Where(i => i.ProjectId == filter.ProjectId);
+
+            if (filter.Status != null)
+                query = query.Where(i => i.Status == filter.Status);
+
+            if (filter.Priority != null)
+                query = query.Where(i => i.Priority == filter.Priority);
+
+            if (filter.AssignedUserId != null)
+                query = query.Where(i => i.AssignedToId == filter.AssignedUserId);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(i => i.Id)
+                .Skip((filter.Page - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .Select(ToIssueResponse)
+                .ToListAsync();
+
+            return new PagedResponse<IssueResponse>
+            {
+                Items = items,
+                Page = filter.Page,
+                PageSize = filter.PageSize,
+                TotalCount = totalCount
+            };
+        }
+
 
         // USERI
 

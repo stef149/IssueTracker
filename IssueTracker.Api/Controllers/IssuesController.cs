@@ -13,6 +13,12 @@ namespace IssueTracker.Api.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<PagedResponse<IssueResponse>>> GetAll([FromQuery] IssueQuery filter)
+        {
+            return Ok(await _service.GetIssuesAsync(filter));
+        }
+
         [HttpGet("overdue")]
         public async Task<ActionResult<List<IssueResponse>>> GetOverdue()
         {
